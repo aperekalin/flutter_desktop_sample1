@@ -17,8 +17,8 @@ workflows:
       #  script: flutter packages pub get
       #- name: Configure for macOS
        # script: |
-          flutter config --enable-macos-desktop
-          find . -name "Podfile" -execdir pod install \;
+     #     flutter config --enable-macos-desktop
+      #    find . -name "Podfile" -execdir pod install \;
    #   - name: Set up keychain
     #    script: keychain initialize
      # - name: Set up provisioning profile
