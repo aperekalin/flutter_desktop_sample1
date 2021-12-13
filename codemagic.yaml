@@ -1,113 +1,113 @@
 workflows:
-  macos-workflow:
-    name: macOS workflow
-    instance_type: mac_mini
-    max_build_duration: 60
-    environment:
-      groups:
-        - macos-signing
-      flutter: master
-      xcode: latest
-      cocoapods: default
-    cache:
-      cache_paths:
-        - ~/.pub-cache
-    scripts:
-      - name: Get Flutter packages
-        script: flutter packages pub get
-      - name: Configure for macOS
-        script: |
+ # macos-workflow:
+    #name: macOS workflow
+    #instance_type: mac_mini
+    #max_build_duration: 60
+    #environment:
+     # groups:
+      #  - macos-signing
+      #flutter: master
+      #xcode: latest
+      #cocoapods: default
+    #cache:
+     # cache_paths:
+      #  - ~/.pub-cache
+    #scripts:
+     # - name: Get Flutter packages
+      #  script: flutter packages pub get
+      #- name: Configure for macOS
+       # script: |
           flutter config --enable-macos-desktop
           find . -name "Podfile" -execdir pod install \;
-      - name: Set up keychain
-        script: keychain initialize
-      - name: Set up provisioning profile
-        script: |
-          PROFILES_HOME="$HOME/Library/MobileDevice/Provisioning Profiles"
-          mkdir -p "$PROFILES_HOME"
-          PROFILE_PATH="$(mktemp "$PROFILES_HOME"/$(uuidgen).mobileprovision)"
-          echo ${FCI_PROVISIONING_PROFILE} | base64 --decode > "$PROFILE_PATH"
-          echo "Saved provisioning profile $PROFILE_PATH"
-      - name: Set up signing certificate
-        script: |
-          echo $FCI_CERTIFICATE | base64 --decode > /tmp/certificate.p12
-          if [ -z ${FCI_CERTIFICATE_PASSWORD+x} ]; then
-            # when using a certificate that is not password-protected
-            keychain add-certificates --certificate /tmp/certificate.p12
-          else
-            # when using a password-protected certificate
-            keychain add-certificates --certificate /tmp/certificate.p12 --certificate-password $FCI_CERTIFICATE_PASSWORD
-          fi
-      - name: Set up code signing
-        script: xcode-project use-profiles
-      - name: Build macOS
-        script: flutter build macos
-    artifacts:
-      - build/macos/**/*.app
-      - flutter_drive.log
-    publishing:
-      email:
-        recipients:
-          - sbis1999@gmail.com
-  linux-workflow:
-    name: Linux workflow
-    instance_type: linux
-    max_build_duration: 60
-    environment:
-      flutter: master
-    cache:
-      cache_paths:
-        - ~/.pub-cache
-    scripts:
-      - name: Get Flutter packages
-        script: flutter packages pub get
-      - name: Configure for Linux
-        script: |
-          flutter config --enable-linux-desktop
-      - name: Build Linux
-        script: flutter build linux
-      - name: Export bundle
-        script: cp -r build/linux/x64/release/bundle $FCI_EXPORT_DIR/bundle
-    artifacts:
-      - build/linux/**/*.zip
-      - flutter_drive.log
-    publishing:
-      email:
-        recipients:
-          - sbis1999@gmail.com
-  linux-workflow-release:
-    name: Linux release workflow
-    instance_type: linux
-    max_build_duration: 60
-    environment:
-      vars:
-        SNAPCRAFT_BUILD_ENVIRONMENT: host
-      groups:
-        - snapcraft_credentials
-      flutter: master
-    cache:
-      cache_paths:
-        - ~/.pub-cache
-    scripts:
-      - name: Get Flutter packages
-        script: flutter packages pub get
-      - name: Configure for Linux
-        script: |
-          flutter config --enable-linux-desktop
-      - name: Login to Snapcraft
-        script: |
-          echo $SNAPCRAFT_LOGIN_CREDENTIALS | base64 --decode > /home/builder/snapcraft-login-credentials
-          snapcraft login --with /home/builder/snapcraft-login-credentials
-      - name: Create Snap package
-        script: snapcraft snap --output flutter-desktop-sample.snap
-      - name: Upload to Snapcraft
-        script: snapcraft upload flutter-desktop-sample.snap --release stable
-    artifacts:
-      - "**/*.snap"
-    publishing:
-      email:
-        recipients:
-          - sbis1999@gmail.com
+   #   - name: Set up keychain
+    #    script: keychain initialize
+     # - name: Set up provisioning profile
+      #  script: |
+       #   PROFILES_HOME="$HOME/Library/MobileDevice/Provisioning Profiles"
+        #  mkdir -p "$PROFILES_HOME"
+         # PROFILE_PATH="$(mktemp "$PROFILES_HOME"/$(uuidgen).mobileprovision)"
+          #echo ${FCI_PROVISIONING_PROFILE} | base64 --decode > "$PROFILE_PATH"
+          #echo "Saved provisioning profile $PROFILE_PATH"
+      #- name: Set up signing certificate
+       # script: |
+        #  echo $FCI_CERTIFICATE | base64 --decode > /tmp/certificate.p12
+         # if [ -z ${FCI_CERTIFICATE_PASSWORD+x} ]; then
+          #  # when using a certificate that is not password-protected
+           # keychain add-certificates --certificate /tmp/certificate.p12
+          #else
+           # # when using a password-protected certificate
+           # keychain add-certificates --certificate /tmp/certificate.p12 --certificate-password $FCI_CERTIFICATE_PASSWORD
+    #      fi
+     # - name: Set up code signing
+      #  script: xcode-project use-profiles
+     # - name: Build macOS
+      #  script: flutter build macos
+    #artifacts:
+     # - build/macos/**/*.app
+      #- flutter_drive.log
+  #  publishing:
+   #   email:
+    #    recipients:
+     #     - sbis1999@gmail.com
+ # linux-workflow:
+  #  name: Linux workflow
+   # instance_type: linux
+    #max_build_duration: 60
+    #environment:
+   #   flutter: master
+   # cache:
+    #  cache_paths:
+#        - ~/.pub-cache
+ #   scripts:
+  #    - name: Get Flutter packages
+   #     script: flutter packages pub get
+    #  - name: Configure for Linux
+     #   script: |
+     #     flutter config --enable-linux-desktop
+     # - name: Build Linux
+     #   script: flutter build linux
+    #  - name: Export bundle
+   #     script: cp -r build/linux/x64/release/bundle $FCI_EXPORT_DIR/bundle
+  #  artifacts:
+  #    - build/linux/**/*.zip
+   #   - flutter_drive.log
+  #  publishing:
+   #   email:
+   #     recipients:
+    #      - sbis1999@gmail.com
+#  linux-workflow-release:
+ #   name: Linux release workflow
+#    instance_type: linux
+ #   max_build_duration: 60
+  #  environment:
+   #   vars:
+    #    SNAPCRAFT_BUILD_ENVIRONMENT: host
+    #  groups:
+     #   - snapcraft_credentials
+#      flutter: master
+ #   cache:
+  #    cache_paths:
+   #     - ~/.pub-cache
+  #  scripts:
+   #   - name: Get Flutter packages
+    #    script: flutter packages pub get
+ #     - name: Configure for Linux
+  #      script: |
+   #       flutter config --enable-linux-desktop
+    #  - name: Login to Snapcraft
+     #   script: |
+      #    echo $SNAPCRAFT_LOGIN_CREDENTIALS | base64 --decode > /home/builder/snapcraft-login-credentials
+#          snapcraft login --with /home/builder/snapcraft-login-credentials
+ #     - name: Create Snap package
+  #      script: snapcraft snap --output flutter-desktop-sample.snap
+   #   - name: Upload to Snapcraft
+#        script: snapcraft upload flutter-desktop-sample.snap --release stable
+ #   artifacts:
+  #    - "**/*.snap"
+   # publishing:
+#      email:
+ #       recipients:
+  #        - sbis1999@gmail.com
   windows-workflow:
     name: Windows workflow
     instance_type: windows_x2
@@ -133,39 +133,39 @@ workflows:
     publishing:
       email:
         recipients:
-          - sbis1999@gmail.com
-  windows-release-workflow:
-    name: Windows release workflow
-    instance_type: windows_x2
-    max_build_duration: 60
-    environment:
-      groups:
-        - windows-signing
-      flutter: master
-    cache:
-      cache_paths:
-        - ~/.pub-cache
-    scripts:
-      - name: Get Flutter packages
-        script: flutter packages pub get
-      - name: Configure for Windows
-        script: flutter config --enable-windows-desktop
-      - name: Build Windows
-        script: flutter build windows
-      - name: Package Windows
-        script: flutter pub run msix:create
-      # - name: Package Windows
-      #   script: |
-      #     flutter pub add msix
-      #     flutter pub run msix:create --display-name='Flutter Desktop' --publisher-display-name='Nevercode' --publisher='CN=0A8E8178-6602-47FD-AEEF-48BC490D92B1' --identity-name='Nevercode.Sample.FlutterDesktopSample' --version=1.0.0.0 --logo-path='./logo/flutter-desktop-logo-256x256.png'
-    artifacts:
-      - build/windows/**/*.msix
-    publishing:
-      email:
-        recipients:
-          - sbis1999@gmail.com
-      partner_center:
-        store_id: 9NLCRRSR2Z5L
-        tenant_id: aa80a389-47f3-47d8-ae60-bb7430667e03
-        client_id: 718d8461-20f2-471d-a8d7-bfca1fc5b1b7
-        client_secret: $PARTNER_CLIENT_SECRET
+          - aperekalin9@gmail.com
+ # windows-release-workflow:
+  #  name: Windows release workflow
+   # instance_type: windows_x2
+   # max_build_duration: 60
+   # environment:
+    #  groups:
+     #   - windows-signing
+  #    flutter: master
+   # cache:
+    #  cache_paths:
+     #   - ~/.pub-cache
+#    scripts:
+ #     - name: Get Flutter packages
+  #      script: flutter packages pub get
+   #   - name: Configure for Windows
+    #    script: flutter config --enable-windows-desktop
+     # - name: Build Windows
+#        script: flutter build windows
+ #     - name: Package Windows
+  #      script: flutter pub run msix:create
+   #   # - name: Package Windows
+    #  #   script: |
+#      #     flutter pub add msix
+ #     #     flutter pub run msix:create --display-name='Flutter Desktop' --publisher-display-name='Nevercode' --publisher='CN=0A8E8178-6602-47FD-AEEF-48BC490D92B1' --identity-name='Nevercode.Sample.FlutterDesktopSample' --version=1.0.0.0 --logo-path='./logo/flutter-desktop-logo-256x256.png'
+  #  artifacts:
+   #   - build/windows/**/*.msix
+#    publishing:
+ #     email:
+  #      recipients:
+   #       - sbis1999@gmail.com
+    #  partner_center:
+     #   store_id: 9NLCRRSR2Z5L
+      #  tenant_id: aa80a389-47f3-47d8-ae60-bb7430667e03
+       # client_id: 718d8461-20f2-471d-a8d7-bfca1fc5b1b7
+     #   client_secret: $PARTNER_CLIENT_SECRET
